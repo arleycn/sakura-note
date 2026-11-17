@@ -1,15 +1,21 @@
 ---
 import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import SakuraBackdrop from '../components/SakuraBackdrop.astro';
 import { SITE } from '../config';
-import '../styles/global.css';
+import {
+  LANG_HTML,
+  LANG_OG_LOCALE,
+  alternatePath,
+  langFromPath,
+  t,
+} from '../lib/i18n';
 
 interface Props {
   title: string;
   description?: string;
-  /** 首页用站名，文章页用「标题 · 站名」 */
   fullTitle?: boolean;
   ogType?: 'website' | 'article';
   ogImage?: string;
@@ -19,7 +25,7 @@ interface Props {
 
 const {
   title,
-  description = SITE.description,
+  description,
   fullTitle = false,
   ogType = 'website',
   ogImage = '/images/og-default.png',
@@ -27,20 +33,33 @@ const {
   jsonLd,
 } = Astro.props;
 
+const lang = langFromPath(Astro.url.pathname);
+const strings = t(lang);
 const pageTitle = fullTitle ? title : `${title} · ${SITE.name}`;
+const pageDescription = description ?? strings.meta.description(SITE.name);
 const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
 const ogImageUrl = new URL(ogImage, Astro.site ?? SITE.url).href;
+const alternates = [
+  { lang: 'zh-CN', path: alternatePath(Astro.url.pathname, 'zh') },
+  { lang: 'en', path: alternatePath(Astro.url.pathname, 'en') },
+];
 ---
 
 <!doctype html>
-<html lang={SITE.locale} transition:animate="none">
+<html lang={LANG_HTML[lang]} transition:animate="none">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <title>{pageTitle}</title>
-    <meta name="description" content={description} />
+    <meta name="description" content={pageDescription} />
     <link rel="canonical" href={canonical} />
+    {
+      alternates.map((item) => (
+        <link rel="alternate" hreflang={item.lang} href={new URL(item.path, Astro.site ?? SITE.url).href} />
+      ))
+    }
+    <link rel="alternate" hreflang="x-default" href={new URL(alternatePath(Astro.url.pathname, 'zh'), Astro.site ?? SITE.url).href} />
     <meta name="robots" content={noindex ? 'noindex,follow' : 'index,follow'} />
     <meta name="generator" content={Astro.generator} />
     <meta name="author" content={SITE.author} />
@@ -48,9 +67,9 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? SITE.url).href;
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={SITE.name} />
     <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:locale" content={LANG_OG_LOCALE[lang]} />
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -60,7 +79,7 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? SITE.url).href;
     <meta name="theme-color" content={SITE.themeColor.dark} media="(prefers-color-scheme: dark)" data-theme-color />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" type="application/rss+xml" title={`${SITE.name} RSS`} href="/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${SITE.name} RSS`} href={lang === 'en' ? '/en/rss.xml' : '/rss.xml'} />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <ClientRouter />
@@ -71,11 +90,10 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? SITE.url).href;
       )
     }
 
-    {/* 首屏防闪烁：必须在样式生效前同步读到主题，故内联 */}
     <script is:inline>
       (function () {
         try {
-          var saved = localStorage.getItem('sakura-blog-theme');
+          var saved = localStorage.getItem('sakura-note-theme');
           var theme = saved === 'light' || saved === 'dark'
             ? saved
             : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -93,7 +111,7 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? SITE.url).href;
   </head>
 
   <body>
-    <a class="skip-link" href="#main">跳到正文</a>
+    <a class="skip-link" href="#main">{strings.nav.skipToContent}</a>
 
     <SakuraBackdrop />
     <Header />
@@ -104,7 +122,7 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? SITE.url).href;
 
     <Footer />
 
-    <button class="backtop" id="backtop" type="button" aria-label="返回顶部">🌸</button>
+    <button class="backtop" id="backtop" type="button" aria-label={strings.nav.backTop}>🌸</button>
 
     <script>
       import '../scripts/site';

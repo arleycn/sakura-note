@@ -1,18 +1,21 @@
 ---
 import { PUBLIC_TURNSTILE_SITE_KEY } from 'astro:env/client';
+import { langFromPath, t } from '../lib/i18n';
 
 interface Props {
   postId: string;
 }
 
 const { postId } = Astro.props;
+const lang = langFromPath(Astro.url.pathname);
+const strings = t(lang).comments;
 const turnstileKey = PUBLIC_TURNSTILE_SITE_KEY ?? '';
 ---
 
 <section class="comments" id="comments" aria-labelledby="comments-title">
   <div class="ch-head">
     <span class="ch-badge" aria-hidden="true">💌</span>
-    <h2 class="ch-title" id="comments-title">留言板</h2>
+    <h2 class="ch-title" id="comments-title">{strings.title}</h2>
     <span class="ch-line"></span>
     <span class="ch-more" id="comment-count" aria-live="polite"></span>
   </div>
@@ -20,14 +23,13 @@ const turnstileKey = PUBLIC_TURNSTILE_SITE_KEY ?? '';
   <form class="comment-form" id="comment-form" data-post-id={postId} novalidate>
     <input type="hidden" name="postId" value={postId} />
 
-    <!-- 蜜罐：正常用户不可见，被填写即判定为脚本 -->
     <div class="hp" aria-hidden="true">
-      <label for="comment-website">网站</label>
+      <label for="comment-website">{strings.website}</label>
       <input id="comment-website" type="text" name="website" tabindex="-1" autocomplete="off" />
     </div>
 
     <div class="field">
-      <label for="comment-author">昵称</label>
+      <label for="comment-author">{strings.nickname}</label>
       <input
         id="comment-author"
         type="text"
@@ -35,23 +37,23 @@ const turnstileKey = PUBLIC_TURNSTILE_SITE_KEY ?? '';
         maxlength="24"
         required
         autocomplete="nickname"
-        placeholder="怎么称呼你呀～"
+        placeholder={strings.nicknamePlaceholder}
       />
     </div>
 
     <div class="field">
-      <label for="comment-body">留言内容</label>
+      <label for="comment-body">{strings.body}</label>
       <textarea
         id="comment-body"
         name="body"
         maxlength="600"
         required
-        placeholder="说点什么吧，纯文本，最多 600 字"
+        placeholder={strings.bodyPlaceholder}
       ></textarea>
     </div>
 
     <div class="field">
-      <label for="comment-image">配图（可选，≤2MB）</label>
+      <label for="comment-image">{strings.image}</label>
       <input id="comment-image" type="file" name="image" accept="image/png,image/jpeg,image/webp,image/gif" />
     </div>
 
@@ -66,17 +68,17 @@ const turnstileKey = PUBLIC_TURNSTILE_SITE_KEY ?? '';
     <div class="form-row">
       <p class="form-status" id="comment-status" role="status" aria-live="polite"></p>
       <button class="btn btn--primary" type="submit" id="comment-submit">
-        发送 ✉️
+        {strings.submit} ✉️
       </button>
     </div>
   </form>
 
   <noscript>
-    <p class="comments__empty">留言需要 JavaScript：提交走 Astro Actions 的 RPC 调用。</p>
+    <p class="comments__empty">{strings.noscript}</p>
   </noscript>
 
   <div class="comment-list" id="comment-list"></div>
-  <p class="comments__empty" id="comment-empty" hidden>还没有留言，来做第一个吧 (๑•̀ㅂ•́)و✧</p>
+  <p class="comments__empty" id="comment-empty" hidden>{strings.empty}</p>
 </section>
 
 {

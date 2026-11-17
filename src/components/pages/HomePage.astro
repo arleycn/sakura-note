@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../PostCard.astro';
+import Pagination from '../Pagination.astro';
+import { SITE } from '../../config';
+import { LANG_HTML, localizePath, t, type Lang } from '../../lib/i18n';
+import { paginate, tagCounts, type Post } from '../../lib/posts';
+
+interface Props {
+  lang: Lang;
+  posts: Post[];
+}
+
+const { lang, posts } = Astro.props;
+const strings = t(lang);
+const { items, current, totalPages } = paginate(posts, 1);
+const tags = tagCounts(posts).slice(0, 10);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  alternateName: SITE.theme,
+  url: new URL(localizePath(lang, '/'), SITE.url).href,
+  description: strings.meta.description(SITE.name),
+  inLanguage: LANG_HTML[lang],
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `${new URL(localizePath(lang, '/search'), SITE.url).href}?q={search_term_string}`,
+    'query-input': 'required name=search_term_string',
+  },
+};
+---
+
+<BaseLayout title={`${SITE.name} · ${strings.hero.subtitle}`} fullTitle jsonLd={jsonLd}>
+  <div class="wrap page">
+    <section class="hero" aria-labelledby="hero-title">
+      <span class="hero__emoji" aria-hidden="true">🌸✨🌸</span>
+      <h1 id="hero-title">{SITE.name}</h1>
+      <p class="hero__sub">
+        {strings.hero.subtitle}<br />
+        <span class="nowrap">{strings.hero.count(posts.length)}</span> ·
+        <span class="hero__en">{strings.hero.motto}</span>
+      </p>
+
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="#posts">{strings.hero.start} 📖</a>
+        <a class="btn btn--ghost" href={localizePath(lang, '/rss.xml')}>{strings.hero.rss} 📮</a>
+      </div>
+
+      <div class="tag-cloud" aria-label={strings.hero.hotTags}>
+        {
+          tags.map(({ tag, count }) => (
+            <a class="tag-pill" href={localizePath(lang, `/tags/${encodeURIComponent(tag)}`)}>
+              #{tag} <b>{count}</b>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="posts" aria-labelledby="posts-title">
+      <div class="ch-head">
+        <span class="ch-badge" aria-hidden="true">📚</span>
+        <h2 class="ch-title" id="posts-title">{strings.hero.latest}</h2>
+        <span class="ch-line"></span>
+        <a class="ch-more" href={localizePath(lang, '/archives')}>{strings.common.allArchives}</a>
+      </div>
+
+      <div class="posts">
+        {items.map((post) => <PostCard post={post} />)}
+      </div>
+
+      <Pagination current={current} totalPages={totalPages} />
+    </section>
+  </div>
+</BaseLayout>

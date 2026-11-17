@@ -39,9 +39,9 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
     <path d="M0 0C-6 -8 -6 -20 0 -25c6 5 6 17 0 25Z" transform="rotate(288)"/>
   </g>
   <text x="600" y="330" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif"
-        font-size="84" font-weight="700" fill="url(#ink)" letter-spacing="4">Arley&apos;s Blog</text>
-  <text x="600" y="392" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif"
-        font-size="26" fill="#6f6178" letter-spacing="3">技术教程 · 二次元 · 资源整理 · 折腾记录</text>
+        font-size="80" font-weight="700" fill="url(#ink)" letter-spacing="4">Sakura Note</text>
+  <text x="600" y="392" text-anchor="middle" font-family="Segoe UI, Microsoft YaHei, sans-serif"
+        font-size="26" fill="#6f6178" letter-spacing="3">TECH NOTES · EDGE HOSTING · SAKURA UI</text>
   <text x="600" y="510" text-anchor="middle" font-family="Consolas, monospace"
         font-size="20" fill="#8b5cd6" letter-spacing="2">ASTRO 7 × CLOUDFLARE WORKERS</text>
 </svg>`;

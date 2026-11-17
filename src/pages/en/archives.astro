@@ -1,0 +1,10 @@
+---
+export const prerender = true;
+
+import ArchivesPage from '../../components/pages/ArchivesPage.astro';
+import { getPosts } from '../../lib/posts';
+
+const posts = await getPosts('en');
+---
+
+<ArchivesPage lang="en" posts={posts} />

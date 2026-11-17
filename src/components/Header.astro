@@ -1,24 +1,42 @@
 ---
 import { NAV, SITE } from '../config';
+import {
+  alternatePath,
+  langFromPath,
+  localizePath,
+  otherLang,
+  t,
+  unlocalizedPath,
+} from '../lib/i18n';
 
 const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
-const isActive = (href: string) =>
-  href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
+const lang = langFromPath(path);
+const strings = t(lang);
+const plainPath = unlocalizedPath(path);
+const targetLang = otherLang(lang);
+
+const navItems = NAV.map((item) => ({
+  ...item,
+  href: localizePath(lang, item.href),
+  label: strings.nav[item.label],
+}));
+
+const isActive = (href: string) => {
+  const bare = unlocalizedPath(href);
+  return bare === '/' ? plainPath === '/' : plainPath === bare || plainPath.startsWith(`${bare}/`);
+};
 ---
 
 <header class="topnav">
-  <a class="logo" href="/">
+  <a class="logo" href={localizePath(lang, '/')}>
     <span class="logo__sakura" aria-hidden="true">🌸</span>
     <span>{SITE.name}</span>
   </a>
 
-  <nav class="navlinks" aria-label="主导航">
+  <nav class="navlinks" aria-label={strings.nav.mainNav}>
     {
-      NAV.map((item) => (
-        <a
-          href={item.href}
-          aria-current={isActive(item.href) ? 'page' : undefined}
-        >
+      navItems.map((item) => (
+        <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
           <span aria-hidden="true">{item.emoji}</span> {item.label}
         </a>
       ))
@@ -26,31 +44,37 @@ const isActive = (href: string) =>
   </nav>
 
   <div class="nav-actions">
-    <a class="icon-btn" href="/search" aria-label="搜索文章" title="搜索 (/)">
+    <a class="icon-btn" href={localizePath(lang, '/search')} aria-label={strings.nav.searchArticles} title={strings.nav.searchShortcut}>
       🔍
+    </a>
+    <a class="icon-btn lang-btn" href={alternatePath(path, targetLang)} aria-label={strings.nav.switchLang} title={strings.nav.switchLang}>
+      {targetLang === 'en' ? 'EN' : '中'}
     </a>
     <button
       class="icon-btn"
       id="theme-toggle"
       type="button"
-      aria-label="切换日夜主题"
-      title="切换日夜主题"
+      aria-label={strings.nav.switchTheme}
+      title={strings.nav.switchTheme}
     >
       <span id="theme-icon" aria-hidden="true">🌙</span>
     </button>
 
     <details class="mobile-menu">
-      <summary aria-label="打开菜单">
+      <summary aria-label={strings.nav.openMenu}>
         <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
       </summary>
       <div class="mobile-menu__panel">
         {
-          NAV.map((item) => (
+          navItems.map((item) => (
             <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
               <span aria-hidden="true">{item.emoji}</span> {item.label}
             </a>
           ))
         }
+        <a href={alternatePath(path, targetLang)}>
+          <span aria-hidden="true">🌐</span> {strings.nav.switchLang}
+        </a>
       </div>
     </details>
   </div>

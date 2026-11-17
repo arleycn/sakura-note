@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import ListingPage from '../../../components/pages/ListingPage.astro';
+import { getPosts, paginate } from '../../../lib/posts';
+import { PAGE_SIZE } from '../../../config';
+
+export async function getStaticPaths() {
+  const posts = await getPosts('en');
+  const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) => ({
+    params: { page: String(index + 2) },
+  }));
+}
+
+const pageNumber = Number(Astro.params.page ?? '2');
+const posts = await getPosts('en');
+const { items, current, totalPages } = paginate(posts, pageNumber);
+---
+
+<ListingPage lang="en" posts={items} current={current} totalPages={totalPages} />

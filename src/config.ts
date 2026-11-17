@@ -1,100 +1,77 @@
 /**
  * 站点级常量与导航配置。
- * 改域名 / 站名 / 作者 / 导航项只动这一个文件。
+ * 默认值全部是 example.com 占位，符合 Astro 主题目录的收录要求。
  */
 export const SITE = {
-  url: 'https://sakura-blog.arley.cn',
-  name: "Arley's Blog",
-  /** 主题名，只用于页脚与关于页的署名，不参与 SEO 标题 */
-  theme: '樱云小筑',
-  tagline: '技术宅，喜欢折腾服务器、二次元和各种奇怪的小工具。',
-  description: 'Arley 的个人博客：技术教程、二次元、资源整理与折腾记录。',
-  author: 'Arley',
-  email: 'arley@arley.cn',
-  github: 'https://github.com/arleycn',
-  telegram: 'https://t.me/Leoniceee',
-  /** 建站年份，页脚版权区间与关于页用 */
-  since: 2021,
-  locale: 'zh-CN',
+  url: import.meta.env.PUBLIC_SITE_URL ?? 'https://example.com',
+  name: 'Sakura Note',
+  theme: 'Sakura Note',
+  author: 'Sakura',
+  email: 'hello@example.com',
+  github: 'https://github.com',
+  since: 2026,
   themeColor: { light: '#ffd7e9', dark: '#241b3a' },
+  repo: 'https://github.com/arleycn/sakura-note',
 } as const;
 
+/** href 不带语言前缀，渲染时按当前语言补。 */
 export const NAV = [
-  { href: '/', label: '首页', emoji: '🌸' },
-  { href: '/archives', label: '归档', emoji: '🗂️' },
-  { href: '/tags', label: '标签', emoji: '🏷️' },
-  { href: '/about', label: '关于', emoji: '🍡' },
-  { href: '/search', label: '搜索', emoji: '🔍' },
+  { href: '/', label: 'home', emoji: '🌸' },
+  { href: '/archives', label: 'archives', emoji: '🗂️' },
+  { href: '/tags', label: 'tags', emoji: '🏷️' },
+  { href: '/about', label: 'about', emoji: '🍡' },
+  { href: '/search', label: 'search', emoji: '🔍' },
 ] as const;
 
+export type NavLabel = (typeof NAV)[number]['label'];
+
+/** 页脚与关于页的社交入口，全部是占位地址 */
 export const SOCIAL = [
-  { href: 'https://github.com/arleycn', label: 'GitHub', emoji: '🐙' },
-  { href: 'https://t.me/Leoniceee', label: 'Telegram', emoji: '✈️' },
-  { href: 'https://arley.cn', label: '主站', emoji: '🏠' },
+  { href: 'https://github.com', label: 'GitHub', emoji: '🐙' },
+  { href: 'https://example.com', label: 'Blog', emoji: '🏠' },
   { href: '/rss.xml', label: 'RSS', emoji: '📮' },
+  { href: SITE.repo, label: 'Source', emoji: '🧩' },
 ] as const;
 
 export interface SiteLink {
   name: string;
   url: string;
-  desc: string;
-  /** 卡片左侧的短标签，两三个字 */
-  badge: string;
+  badge: { zh: string; en: string };
+  desc: { zh: string; en: string };
   current?: boolean;
 }
 
-/** 「我做的站」，关于页的引流入口 */
+/** 关于页的示例站点卡片，全部是占位数据。 */
 export const MY_SITES: SiteLink[] = [
   {
-    name: 'Arley',
-    url: 'https://arley.cn',
-    desc: '个人主页，所有子站的入口都在这里。',
-    badge: '主页',
+    name: 'Example Home',
+    url: 'https://example.com',
+    badge: { zh: '主页', en: 'Home' },
+    desc: {
+      zh: '示例站点一，用来展示卡片布局。',
+      en: 'Sample site one, showing the card layout.',
+    },
   },
   {
-    name: '樱云导航',
-    url: 'https://bm.arley.cn',
-    desc: '书签式站点导航，常用工具和资源一屏找齐。',
-    badge: '导航',
-  },
-  {
-    name: '樱云搜索',
-    url: 'https://bm.arley.cn/search',
-    desc: '聚合式搜索入口，一次输入跳多个引擎。',
-    badge: '搜索',
-  },
-  {
-    name: "Arley's 社区",
-    url: 'https://bbs.arley.cn',
-    desc: '论坛，聊技术也聊闲事，注册就能发帖。',
-    badge: '社区',
-  },
-  {
-    name: '樱云云盘',
-    url: 'https://pan.arley.cn',
-    desc: '资源、工具、软件和一整柜存货，慢慢翻。',
-    badge: '云盘',
-  },
-  {
-    name: '工具站',
-    url: 'https://tools.arley.cn',
-    desc: '在线小工具合集，日常常用的都在这里。',
-    badge: '工具',
-  },
-  {
-    name: '童年体验馆',
-    url: 'https://fun.arley.cn',
-    desc: '红白机卡带、老动画和放学后的游戏，都能再玩一次。',
-    badge: '童年',
+    name: 'Example Notes',
+    url: 'https://example.com/notes',
+    badge: { zh: '笔记', en: 'Notes' },
+    desc: {
+      zh: '示例站点二，换成你自己的项目即可。',
+      en: 'Sample site two — swap in your own project.',
+    },
   },
   {
     name: SITE.name,
     url: '/',
-    desc: '你正在看的这个站，写长文和技术记录的地方。',
-    badge: '本站',
+    badge: { zh: '本站', en: 'This site' },
+    desc: {
+      zh: '你正在看的这个博客。',
+      en: 'The blog you are reading right now.',
+    },
     current: true,
   },
 ];
 
-/** 每页文章数：三列网格下一屏两行 */
+/** 每页文章数：三列网格，两行正好一屏 */
 export const PAGE_SIZE = 6;

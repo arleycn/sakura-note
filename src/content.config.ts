@@ -14,7 +14,7 @@ const posts = defineCollection({
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
-    // 与旧站字段对齐：分类是大类（折腾 / 技术教程），标签是细粒度关键词
+    // categories 是大类，tags 是细粒度关键词
     categories: z.array(z.string()).default([]),
     // 列表卡片上的装饰符号，纯样式，不参与 SEO
     emoji: z.string().default('🌸'),

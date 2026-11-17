@@ -1,0 +1,10 @@
+---
+export const prerender = true;
+
+import HomePage from '../../components/pages/HomePage.astro';
+import { getPosts } from '../../lib/posts';
+
+const posts = await getPosts('en');
+---
+
+<HomePage lang="en" posts={posts} />

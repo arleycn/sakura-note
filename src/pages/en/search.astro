@@ -1,0 +1,22 @@
+---
+import SearchPage from '../../components/pages/SearchPage.astro';
+import { getPosts } from '../../lib/posts';
+
+Astro.response.headers.set('Cache-Control', 'no-store');
+
+const query = (Astro.url.searchParams.get('q') ?? '').trim();
+const keyword = query.toLowerCase();
+const posts = await getPosts('en');
+const results = keyword
+  ? posts
+      .filter((post) =>
+        [post.data.title, post.data.description, post.data.tags.join(' '), post.body ?? '']
+          .join(' ')
+          .toLowerCase()
+          .includes(keyword),
+      )
+      .slice(0, 30)
+  : [];
+---
+
+<SearchPage lang="en" query={query} results={results} />

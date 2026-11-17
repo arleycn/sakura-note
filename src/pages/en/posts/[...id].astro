@@ -1,0 +1,16 @@
+---
+export const prerender = true;
+
+import PostPage from '../../../components/pages/PostPage.astro';
+import { getPosts, slugOf } from '../../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts('en');
+  return posts.map((post) => ({ params: { id: slugOf(post) }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const posts = await getPosts('en');
+---
+
+<PostPage post={post} posts={posts} />

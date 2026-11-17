@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { localizePath, t, type Lang } from '../../lib/i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const strings = t(lang).notFound;
+---
+
+<BaseLayout title={strings.title} description={strings.description} noindex>
+  <div class="wrap page" style="padding-top: calc(var(--nav-h) + 80px); text-align: center">
+    <p style="font-size:64px;line-height:1" aria-hidden="true">🌸🍃</p>
+    <h1 style="font-family:var(--font-disp);font-size:clamp(28px,5vw,40px);margin-top:14px">
+      {strings.heading}
+    </h1>
+    <p style="color:var(--muted);margin-top:10px">{strings.body}</p>
+    <div class="hero__actions">
+      <a class="btn btn--primary" href={localizePath(lang, '/')}>{strings.home} 🏠</a>
+      <a class="btn btn--ghost" href={localizePath(lang, '/archives')}>{strings.archives} 🗂️</a>
+    </div>
+  </div>
+</BaseLayout>

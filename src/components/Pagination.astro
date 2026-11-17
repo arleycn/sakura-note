@@ -1,35 +1,38 @@
 ---
+import { langFromPath, localizePath, t } from '../lib/i18n';
+
 interface Props {
   current: number;
   totalPages: number;
 }
 
 const { current, totalPages } = Astro.props;
-
-const hrefFor = (page: number) => (page <= 1 ? '/' : `/page/${page}`);
+const lang = langFromPath(Astro.url.pathname);
+const strings = t(lang);
+const hrefFor = (page: number) => localizePath(lang, page <= 1 ? '/' : `/page/${page}`);
 ---
 
 {
   totalPages > 1 && (
-    <nav class="pager" aria-label="分页">
+    <nav class="pager" aria-label={strings.common.pagination}>
       {current > 1 ? (
         <a class="btn" href={hrefFor(current - 1)} data-astro-prefetch>
-          ← 上一页
+          {strings.common.prevPage}
         </a>
       ) : (
-        <span class="btn" aria-disabled="true" style="opacity:.45">← 上一页</span>
+        <span class="btn" aria-disabled="true" style="opacity:.45">{strings.common.prevPage}</span>
       )}
 
       <span class="pager__info">
-        第 {current} / {totalPages} 页
+        {strings.common.pageIndicator(current, totalPages)}
       </span>
 
       {current < totalPages ? (
         <a class="btn" href={hrefFor(current + 1)} data-astro-prefetch>
-          下一页 →
+          {strings.common.nextPage}
         </a>
       ) : (
-        <span class="btn" aria-disabled="true" style="opacity:.45">下一页 →</span>
+        <span class="btn" aria-disabled="true" style="opacity:.45">{strings.common.nextPage}</span>
       )}
     </nav>
   )

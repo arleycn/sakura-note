@@ -1,0 +1,10 @@
+---
+export const prerender = true;
+
+import TagsIndexPage from '../../../components/pages/TagsIndexPage.astro';
+import { getPosts } from '../../../lib/posts';
+
+const posts = await getPosts('en');
+---
+
+<TagsIndexPage lang="en" posts={posts} />

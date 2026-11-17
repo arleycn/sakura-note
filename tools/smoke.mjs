@@ -9,7 +9,7 @@ import puppeteer from 'puppeteer-core';
 const EDGE = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
 const BASE = process.argv[2] ?? 'http://127.0.0.1:8787';
 // 用首页第一页上的一篇真实文章做导航与评论目标
-const TARGET = '/posts/xiongan-five-years';
+const TARGET = '/posts/hello-world';
 
 const results = [];
 const errors = [];
@@ -38,7 +38,7 @@ await page.click('#theme-toggle');
 await new Promise((resolve) => setTimeout(resolve, 250));
 const after = await page.evaluate(() => ({
   theme: document.documentElement.dataset.theme,
-  saved: localStorage.getItem('sakura-blog-theme'),
+  saved: localStorage.getItem('sakura-note-theme'),
   bg: getComputedStyle(document.body).backgroundColor,
   meta: document.querySelector('meta[data-theme-color]')?.getAttribute('content'),
 }));
@@ -85,9 +85,9 @@ check('阅读量计数', Number(views) >= 1, `views=${views}`);
 await page.setExtraHTTPHeaders({
   'CF-Connecting-IP': `203.0.113.${Math.floor(Math.random() * 200) + 10}`,
 });
-const author = `测试${Date.now().toString().slice(-5)}`;
+const author = `Smoke${Date.now().toString().slice(-5)}`;
 await page.type('#comment-author', author, { delay: 10 });
-await page.type('#comment-body', '浏览器冒烟测试：这条留言应该出现在便签列表里。', { delay: 5 });
+await page.type('#comment-body', 'Browser smoke test: this note should appear in the list.', { delay: 5 });
 await page.evaluate(() => {
   document.querySelector('#comment-form')?.scrollIntoView({ behavior: 'instant', block: 'center' });
 });

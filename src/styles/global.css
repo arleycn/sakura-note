@@ -1,7 +1,7 @@
 /* ============================================================
    樱云小筑 · 全站样式
-   设计语言取自 bm.arley.cn（樱云导航）：樱粉渐变天空、星点、流云、
-   落樱、糖果按钮、手帐便签。正文区刻意克制，保证阅读。
+   设计语言：樱粉渐变天空、星点、流云、落樱、糖果按钮、手帐便签。
+   正文区刻意克制，保证阅读。
    ============================================================ */
 
 :root {
@@ -428,6 +428,12 @@ html[data-theme='dark'] .backdrop__cloud {
 .icon-btn:hover {
   background: var(--pink-soft);
   transform: translateY(-1px);
+}
+
+.lang-btn {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .icon-btn:active {

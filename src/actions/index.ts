@@ -8,7 +8,7 @@ const postId = z
   .string()
   .min(1)
   .max(160)
-  .regex(/^[\w-]+$/, '文章 id 只允许字母、数字、下划线与连字符');
+  .regex(/^[\w-]+$/, 'Post id may only contain letters, numbers, underscores and hyphens');
 
 const nonEmpty = (min: number, max: number, label: string) =>
   z.preprocess(
@@ -51,8 +51,8 @@ export const server = {
       accept: 'form',
       input: z.object({
         postId,
-        author: nonEmpty(1, 24, '昵称'),
-        body: nonEmpty(2, 600, '内容'),
+        author: nonEmpty(1, 24, 'Name'),
+        body: nonEmpty(2, 600, 'Comment'),
         // 蜜罐字段：正常用户永远看不到，填了就是脚本
         website: z.string().nullish(),
         'cf-turnstile-response': z.string().nullish(),
@@ -72,7 +72,7 @@ export const server = {
         if (!allowed || !daily) {
           throw new ActionError({
             code: 'TOO_MANY_REQUESTS',
-            message: '留言太频繁啦，歇一会儿再来 (๑•́ω•̀)',
+            message: 'Too many comments in a short time. Please try again later.',
           });
         }
 
@@ -83,7 +83,7 @@ export const server = {
         if (!passed) {
           throw new ActionError({
             code: 'FORBIDDEN',
-            message: '人机校验没通过，刷新页面再试一次',
+            message: 'Verification failed. Refresh the page and try again.',
           });
         }
 
@@ -94,19 +94,19 @@ export const server = {
           if (!ext) {
             throw new ActionError({
               code: 'BAD_REQUEST',
-              message: '配图只支持 PNG / JPEG / WebP / GIF',
+              message: 'Only PNG, JPEG, WebP and GIF images are supported.',
             });
           }
           if (file.size > MAX_IMAGE_BYTES) {
             throw new ActionError({
               code: 'BAD_REQUEST',
-              message: '配图请控制在 2MB 以内',
+              message: 'The image must be 2MB or smaller.',
             });
           }
           if (!env.MEDIA) {
             throw new ActionError({
               code: 'INTERNAL_SERVER_ERROR',
-              message: '图床还没配置好，先发纯文字吧',
+              message: 'Image storage is not configured. Please post without an image.',
             });
           }
 

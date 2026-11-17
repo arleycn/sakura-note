@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../config';
+import { t, type Lang } from '../../lib/i18n';
+import { formatShort, postPath, type Post } from '../../lib/posts';
+
+interface Props {
+  lang: Lang;
+  posts: Post[];
+}
+
+const { lang, posts } = Astro.props;
+const strings = t(lang);
+
+const byYear = posts.reduce<Map<number, Post[]>>((map, post) => {
+  const year = post.data.pubDate.getFullYear();
+  const bucket = map.get(year) ?? [];
+  bucket.push(post);
+  map.set(year, bucket);
+  return map;
+}, new Map());
+
+const years = [...byYear.entries()].sort((a, b) => b[0] - a[0]);
+---
+
+<BaseLayout title={strings.archives.title} description={strings.archives.description(SITE.name)}>
+  <div class="wrap page" style="padding-top: calc(var(--nav-h) + 40px)">
+    <div class="ch-head" style="margin-top:0">
+      <span class="ch-badge" aria-hidden="true">🗂️</span>
+      <h1 class="ch-title">{strings.archives.title}</h1>
+      <span class="ch-line"></span>
+      <span class="ch-more">{strings.archives.summary(posts.length, years.length)}</span>
+    </div>
+
+    {
+      years.map(([year, items]) => (
+        <section class="archive-year" aria-labelledby={`year-${year}`}>
+          <h2 id={`year-${year}`}>
+            {year} <span style="font-size:14px;color:var(--muted)">{strings.archives.yearCount(items.length)}</span>
+          </h2>
+          <ul class="archive-list">
+            {items.map((post) => (
+              <li class="archive-item">
+                <time datetime={post.data.pubDate.toISOString()}>
+                  {formatShort(post.data.pubDate, lang)}
+                </time>
+                <a href={postPath(post)}>
+                  {post.data.emoji} {post.data.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>

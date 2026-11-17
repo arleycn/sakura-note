@@ -1,11 +1,12 @@
 import { actions, isInputError } from 'astro:actions';
+import { clientLabels } from '../lib/client-i18n';
 
 /**
  * 全站客户端逻辑，统一挂在 astro:page-load 上：
  * ClientRouter 换页后 DOM 是新节点，必须每次重新绑定。
  */
 
-const THEME_KEY = 'sakura-blog-theme';
+const THEME_KEY = 'sakura-note-theme';
 const THEME_COLOR = { light: '#ffd7e9', dark: '#241b3a' } as const;
 
 function syncThemeUi(theme: 'light' | 'dark') {
@@ -216,18 +217,18 @@ async function initViews() {
   }
 }
 
-function formatRelative(timestamp: number): string {
+function formatRelative(timestamp: number, labels: ReturnType<typeof clientLabels>): string {
   const diff = Date.now() - timestamp;
   const minute = 60_000;
   const hour = 60 * minute;
   const day = 24 * hour;
 
-  if (diff < minute) return '刚刚';
-  if (diff < hour) return `${Math.floor(diff / minute)} 分钟前`;
-  if (diff < day) return `${Math.floor(diff / hour)} 小时前`;
-  if (diff < day * 30) return `${Math.floor(diff / day)} 天前`;
+  if (diff < minute) return labels.justNow;
+  if (diff < hour) return labels.minutesAgo(Math.floor(diff / minute));
+  if (diff < day) return labels.hoursAgo(Math.floor(diff / hour));
+  if (diff < day * 30) return labels.daysAgo(Math.floor(diff / day));
 
-  return new Intl.DateTimeFormat('zh-CN', {
+  return new Intl.DateTimeFormat(labels.locale, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -242,7 +243,7 @@ type CommentView = {
   createdAt: number;
 };
 
-function buildCommentNode(comment: CommentView, index: number): HTMLElement {
+function buildCommentNode(comment: CommentView, index: number, labels: ReturnType<typeof clientLabels>): HTMLElement {
   const note = document.createElement('article');
   note.className = 'note';
   note.style.setProperty('--tilt', `${index % 2 === 0 ? -1 : 1}deg`);
@@ -257,7 +258,7 @@ function buildCommentNode(comment: CommentView, index: number): HTMLElement {
   const time = document.createElement('time');
   time.className = 'note__time';
   time.dateTime = new Date(comment.createdAt).toISOString();
-  time.textContent = formatRelative(comment.createdAt);
+  time.textContent = formatRelative(comment.createdAt, labels);
 
   head.appendChild(author);
   head.appendChild(time);
@@ -273,7 +274,7 @@ function buildCommentNode(comment: CommentView, index: number): HTMLElement {
     const image = document.createElement('img');
     image.className = 'note__image';
     image.src = comment.imageUrl;
-    image.alt = `${comment.author} 上传的配图`;
+    image.alt = labels.imageAlt(comment.author);
     image.loading = 'lazy';
     image.decoding = 'async';
     note.appendChild(image);
@@ -305,6 +306,7 @@ function initComments() {
   const postId = form.dataset.postId;
   if (!postId) return;
 
+  const labels = clientLabels();
   const status = document.getElementById('comment-status');
   const empty = document.getElementById('comment-empty');
   const count = document.getElementById('comment-count');
@@ -317,9 +319,9 @@ function initComments() {
   };
 
   const renderList = (comments: CommentView[]) => {
-    list.replaceChildren(...comments.map((comment, index) => buildCommentNode(comment, index)));
+    list.replaceChildren(...comments.map((comment, index) => buildCommentNode(comment, index, labels)));
     if (empty) empty.hidden = comments.length > 0;
-    if (count) count.textContent = comments.length > 0 ? `${comments.length} 条` : '';
+    if (count) count.textContent = comments.length > 0 ? labels.count(comments.length) : '';
   };
 
   const load = async () => {
@@ -336,16 +338,16 @@ function initComments() {
     const body = String(formData.get('body') ?? '').trim();
 
     if (author.length === 0) {
-      setStatus('先留个昵称吧～', 'error');
+      setStatus(labels.needName, 'error');
       return;
     }
     if (body.length < 2) {
-      setStatus('内容太短啦，至少写两个字', 'error');
+      setStatus(labels.tooShort, 'error');
       return;
     }
 
     submit?.setAttribute('disabled', '');
-    setStatus('正在发送…', '');
+    setStatus(labels.sending, '');
 
     const { data, error } = await actions.comments.add(formData);
 
@@ -353,24 +355,24 @@ function initComments() {
 
     if (error) {
       const message = isInputError(error)
-        ? '昵称或内容不符合要求，检查一下长度'
-        : error.message || '发送失败，稍后再试';
+        ? labels.invalid
+        : error.message || labels.generic;
       setStatus(message, 'error');
       return;
     }
 
     if (data?.comment) {
-      list.insertBefore(buildCommentNode(data.comment, 0), list.firstChild);
+      list.insertBefore(buildCommentNode(data.comment, 0, labels), list.firstChild);
       if (empty) empty.hidden = true;
       const total = list.querySelectorAll('.note').length;
-      if (count) count.textContent = `${total} 条`;
+      if (count) count.textContent = labels.count(total);
     }
 
     form.reset();
     if (turnstileWidget) {
       (window as unknown as { turnstile?: { reset: (id: string) => void } }).turnstile?.reset(turnstileWidget);
     }
-    setStatus('留言成功，谢谢你 (๑˃̵ᴗ˂̵)و', 'ok');
+    setStatus(labels.success, 'ok');
   });
 
   form.dataset.bound = '1';
@@ -387,7 +389,7 @@ function initSearchShortcut() {
     if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
     if (target?.isContentEditable) return;
     event.preventDefault();
-    window.location.href = '/search';
+    window.location.href = document.documentElement.lang === 'en' ? '/en/search' : '/search';
   });
 }
 

@@ -1,0 +1,163 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Comments from '../Comments.astro';
+import { SITE } from '../../config';
+import { LANG_HTML, t } from '../../lib/i18n';
+import {
+  formatDate,
+  langOf,
+  postPath,
+  readingTime,
+  slugOf,
+  tagPath,
+  type Post,
+} from '../../lib/posts';
+
+interface Props {
+  post: Post;
+  posts: Post[];
+}
+
+const { post, posts } = Astro.props;
+const { Content, headings } = await render(post);
+const lang = langOf(post);
+const strings = t(lang);
+const slug = slugOf(post);
+
+const index = posts.findIndex((item) => item.id === post.id);
+const newer = index > 0 ? posts[index - 1] : undefined;
+const older = index >= 0 && index < posts.length - 1 ? posts[index + 1] : undefined;
+
+const related = posts
+  .filter(
+    (item) =>
+      item.id !== post.id &&
+      item.data.tags.some((tag) => post.data.tags.includes(tag)),
+  )
+  .slice(0, 2);
+
+const toc = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
+const published = post.data.pubDate;
+const updated = post.data.updatedDate ?? published;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: published.toISOString(),
+  dateModified: updated.toISOString(),
+  inLanguage: LANG_HTML[lang],
+  author: { '@type': 'Person', name: SITE.author, url: SITE.url },
+  publisher: { '@type': 'Organization', name: SITE.name },
+  mainEntityOfPage: new URL(postPath(post), SITE.url).href,
+  keywords: post.data.tags.join(', '),
+};
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  ogType="article"
+  jsonLd={jsonLd}
+>
+  <div class="wrap">
+    <div class="post-layout page">
+      <article class="post" id="post">
+        <header class="post__head">
+          <span class="post__emoji" aria-hidden="true">{post.data.emoji}</span>
+          <h1 class="post__title">{post.data.title}</h1>
+          <p class="post__desc">{post.data.description}</p>
+
+          <div class="post__meta">
+            <time datetime={published.toISOString()}>{formatDate(published, lang)}</time>
+            {
+              post.data.updatedDate && (
+                <span>{strings.common.updated(formatDate(post.data.updatedDate, lang))}</span>
+              )
+            }
+            <span>{strings.common.readTimeLong(readingTime(post.body, lang))}</span>
+            {
+              post.data.categories.map((category) => (
+                <span class="post__cat">📁 {category}</span>
+              ))
+            }
+            <span class="post__views" data-views-post={slug}>
+              👀 <span data-views-count>—</span> {strings.common.views}
+            </span>
+            <span class="post-card__tags">
+              {
+                post.data.tags.map((tag) => (
+                  <a class="post-card__tag" href={tagPath(tag, lang)}>
+                    #{tag}
+                  </a>
+                ))
+              }
+            </span>
+          </div>
+        </header>
+
+        <div class="prose">
+          <Content />
+        </div>
+
+        <nav class="pager" aria-label={strings.common.postNav}>
+          {
+            older ? (
+              <a class="btn" href={postPath(older)} data-astro-prefetch>
+                ← {older.data.title}
+              </a>
+            ) : (
+              <span />
+            )
+          }
+          {
+            newer ? (
+              <a class="btn" href={postPath(newer)} data-astro-prefetch>
+                {newer.data.title} →
+              </a>
+            ) : (
+              <span />
+            )
+          }
+        </nav>
+
+        {related.length > 0 && (
+          <section aria-labelledby="related-title" style="margin-top:34px">
+            <div class="ch-head" style="margin-top:0">
+              <span class="ch-badge" aria-hidden="true">🌷</span>
+              <h2 class="ch-title" id="related-title">{strings.post.related}</h2>
+              <span class="ch-line"></span>
+            </div>
+            <div class="posts">
+              {related.map((item) => (
+                <a class="tag-card" href={postPath(item)}>
+                  <span>{item.data.emoji} {item.data.title}</span>
+                  <b>→</b>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <Comments postId={slug} />
+      </article>
+
+      {
+        toc.length > 2 && (
+          <aside class="toc" aria-labelledby="toc-title">
+            <p class="toc__title" id="toc-title">{strings.post.toc}</p>
+            <ol>
+              {toc.map((heading) => (
+                <li class={`depth-${heading.depth}`}>
+                  <a href={`#${heading.slug}`}>{heading.text}</a>
+                </li>
+              ))}
+            </ol>
+          </aside>
+        )
+      }
+    </div>
+  </div>
+</BaseLayout>

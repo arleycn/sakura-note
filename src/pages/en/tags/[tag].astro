@@ -1,0 +1,17 @@
+---
+export const prerender = true;
+
+import TagPostsPage from '../../../components/pages/TagPostsPage.astro';
+import { getPosts, tagCounts } from '../../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts('en');
+  return tagCounts(posts).map(({ tag }) => ({ params: { tag } }));
+}
+
+const tag = Astro.params.tag ?? '';
+const posts = await getPosts('en');
+const matched = posts.filter((post) => post.data.tags.includes(tag));
+---
+
+<TagPostsPage lang="en" tag={tag} posts={matched} />

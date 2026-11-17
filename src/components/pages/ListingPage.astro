@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../PostCard.astro';
+import Pagination from '../Pagination.astro';
+import { SITE } from '../../config';
+import { localizePath, t, type Lang } from '../../lib/i18n';
+import type { Post } from '../../lib/posts';
+
+interface Props {
+  lang: Lang;
+  posts: Post[];
+  current: number;
+  totalPages: number;
+}
+
+const { lang, posts, current, totalPages } = Astro.props;
+const strings = t(lang);
+---
+
+<BaseLayout
+  title={strings.pages.pageTitle(current)}
+  description={strings.pages.pageDescription(SITE.name, current)}
+>
+  <div class="wrap page">
+    <section aria-labelledby="posts-title" style="padding-top: calc(var(--nav-h) + 40px)">
+      <div class="ch-head">
+        <span class="ch-badge" aria-hidden="true">📚</span>
+        <h2 class="ch-title" id="posts-title">{strings.pages.pageTitle(current)}</h2>
+        <span class="ch-line"></span>
+        <a class="ch-more" href={localizePath(lang, '/archives')}>{strings.common.allArchives}</a>
+      </div>
+
+      <div class="posts">
+        {posts.map((post) => <PostCard post={post} />)}
+      </div>
+
+      <Pagination current={current} totalPages={totalPages} />
+    </section>
+  </div>
+</BaseLayout>

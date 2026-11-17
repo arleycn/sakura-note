@@ -4,13 +4,21 @@ import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
 
 /**
- * 站点正式域名。sitemap / canonical / RSS / OG 都以此为准，
- * 换域名只改这一处（Cloudflare 上再把 workers.dev 跳过来）。
+ * 站点正式域名。sitemap / canonical / RSS / OG 都以此为准。
+ * 这是个占位值：部署前改成你自己的域名（README「配置」一节有清单）。
  */
-const SITE = 'https://sakura-blog.arley.cn';
+const SITE = process.env.PUBLIC_SITE_URL || 'https://example.com';
 
 export default defineConfig({
   site: SITE,
+
+  // 官方 i18n 路由：中文为默认语言、不带前缀，英文带 /en。
+  // 页面按 src/lib/i18n.ts 的 localizePath() 生成链接。
+  i18n: {
+    defaultLocale: 'zh',
+    locales: ['zh', 'en'],
+    routing: { prefixDefaultLocale: false },
+  },
 
   // Astro 7 + Cloudflare 的官方组合：默认按需渲染，
   // 内容页用 `export const prerender = true` 在构建期产出静态资产，
@@ -49,6 +57,11 @@ export default defineConfig({
     sitemap({
       // 404 / 搜索页不参与收录
       filter: (page) => !page.includes('/404') && !page.includes('/search'),
+      // 让 sitemap 为同一篇内容的中英版本输出 hreflang 互指
+      i18n: {
+        defaultLocale: 'zh',
+        locales: { zh: 'zh-CN', en: 'en' },
+      },
     }),
   ],
 
@@ -56,6 +69,11 @@ export default defineConfig({
   // secret 只在服务端可读；PUBLIC_ 前缀的会被打进客户端，绝不放密钥。
   env: {
     schema: {
+      PUBLIC_SITE_URL: envField.string({
+        context: 'client',
+        access: 'public',
+        optional: true,
+      }),
       PUBLIC_TURNSTILE_SITE_KEY: envField.string({
         context: 'client',
         access: 'public',

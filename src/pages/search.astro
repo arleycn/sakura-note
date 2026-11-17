@@ -1,90 +1,22 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import PostCard from '../components/PostCard.astro';
+import SearchPage from '../components/pages/SearchPage.astro';
 import { getPosts } from '../lib/posts';
-import { SITE } from '../config';
 
-/*
- * 搜索页刻意不预渲染：查询词来自 URL，构建期不可知。
- * 页面用原生 GET 表单提交，服务端读 searchParams 后再渲染，
- * 不需要手写 fetch / 索引 JSON。
- */
 Astro.response.headers.set('Cache-Control', 'no-store');
 
 const query = (Astro.url.searchParams.get('q') ?? '').trim();
 const keyword = query.toLowerCase();
-
-const posts = await getPosts();
+const posts = await getPosts('zh');
 const results = keyword
   ? posts
-      .filter((post) => {
-        const haystack = [
-          post.data.title,
-          post.data.description,
-          post.data.tags.join(' '),
-          post.body ?? '',
-        ]
+      .filter((post) =>
+        [post.data.title, post.data.description, post.data.tags.join(' '), post.body ?? '']
           .join(' ')
-          .toLowerCase();
-        return haystack.includes(keyword);
-      })
+          .toLowerCase()
+          .includes(keyword),
+      )
       .slice(0, 30)
   : [];
 ---
 
-<BaseLayout
-  title={query ? `搜索：${query}` : '搜索'}
-  description={`搜索 ${SITE.name} 的全部笔记`}
-  noindex
->
-  <div class="wrap page" style="padding-top: calc(var(--nav-h) + 40px); max-width: 880px">
-    <div class="ch-head" style="margin-top:0">
-      <span class="ch-badge" aria-hidden="true">🔍</span>
-      <h1 class="ch-title">搜索</h1>
-      <span class="ch-line"></span>
-    </div>
-
-    <form class="search-form" method="get" action="/search" role="search">
-      <label for="q" class="hp">关键词</label>
-      <input
-        id="q"
-        type="search"
-        name="q"
-        value={query}
-        placeholder="输入标题、标签或正文关键词…"
-        autocomplete="off"
-        autofocus
-      />
-      <button class="btn btn--primary" type="submit">找一找 🔍</button>
-    </form>
-
-    {
-      query && (
-        <p class="ch-more" style="margin-top:18px">
-          「{query}」共找到 {results.length} 篇
-        </p>
-      )
-    }
-
-    <div class="posts" style="margin-top:20px">
-      {results.map((post) => <PostCard post={post} />)}
-    </div>
-
-    {
-      query && results.length === 0 && (
-        <p class="comments__empty">
-          没找到相关文章。换个关键词试试，或者去
-          <a href="/archives">归档</a> 翻翻。
-        </p>
-      )
-    }
-
-    {
-      !query && (
-        <p class="comments__empty">
-          提示：任意页面按 <kbd>/</kbd> 可以直接跳到搜索。
-        </p>
-      )
-    }
-  </div>
-</BaseLayout>
+<SearchPage lang="zh" query={query} results={results} />
