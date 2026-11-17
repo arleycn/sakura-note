@@ -1,0 +1,60 @@
+---
+export const prerender = true;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../config';
+
+const stack = [
+  { layer: '框架', value: 'Astro 7.4 · 内容集合 + 按需渲染', emoji: '🚀' },
+  { layer: '部署', value: 'Cloudflare Workers + Static Assets', emoji: '☁️' },
+  { layer: '评论', value: 'D1 存正文，Actions 做接口', emoji: '💬' },
+  { layer: '计数', value: 'KV 记阅读量，Cookie 去重', emoji: '👀' },
+  { layer: '图片', value: 'R2 存配图，Images binding 做变换', emoji: '🖼️' },
+  { layer: '交互', value: 'ClientRouter + Actions（官方 ajax）', emoji: '⚡' },
+];
+---
+
+<BaseLayout title="关于" description={`关于 ${SITE.name} 与作者 ${SITE.author}`}>
+  <div class="wrap page" style="padding-top: calc(var(--nav-h) + 40px); max-width: 880px">
+    <div class="ch-head" style="margin-top:0">
+      <span class="ch-badge" aria-hidden="true">🍡</span>
+      <h1 class="ch-title">关于</h1>
+      <span class="ch-line"></span>
+    </div>
+
+    <section class="panel">
+      <h2>🌸 这是哪儿</h2>
+      <p>
+        {SITE.name}（{SITE.nameEn}）是 {SITE.author} 的樱花主题博客。
+        这里记录独立开发、边缘计算与一点二次元日常，文章不多，但每篇都尽量写完。
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>🧱 站点是怎么搭的</h2>
+      <p>全部按官方文档的推荐方式落地，没有自建框架层。</p>
+      <div class="tag-grid" style="margin-top:16px">
+        {
+          stack.map((item) => (
+            <div class="tag-card" style="cursor:default">
+              <span>{item.emoji} {item.layer}</span>
+              <b style="font-size:12.5px;font-weight:500;color:var(--muted)">{item.value}</b>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>📮 找我</h2>
+      <p>
+        邮箱 <a href={`mailto:${SITE.email}`}>{SITE.email}</a> ·
+        GitHub <a href="https://github.com/arleycn" rel="noopener">arleycn</a> ·
+        主站 <a href="https://arley.cn" rel="noopener">arley.cn</a>
+      </p>
+      <p style="margin-top:8px">
+        站内留言直接在任意文章底部写，支持一张 2MB 以内的配图。
+      </p>
+    </section>
+  </div>
+</BaseLayout>

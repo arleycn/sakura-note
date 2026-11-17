@@ -1,0 +1,31 @@
+---
+export const prerender = true;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPosts, tagCounts } from '../../lib/posts';
+
+const posts = await getPosts();
+const tags = tagCounts(posts);
+---
+
+<BaseLayout title="标签" description="按标签浏览樱云小筑的全部笔记">
+  <div class="wrap page" style="padding-top: calc(var(--nav-h) + 40px)">
+    <div class="ch-head" style="margin-top:0">
+      <span class="ch-badge" aria-hidden="true">🏷️</span>
+      <h1 class="ch-title">标签</h1>
+      <span class="ch-line"></span>
+      <span class="ch-more">{tags.length} 个标签</span>
+    </div>
+
+    <div class="tag-grid">
+      {
+        tags.map(({ tag, count }) => (
+          <a class="tag-card" href={`/tags/${encodeURIComponent(tag)}`}>
+            <span>#{tag}</span>
+            <b>{count}</b>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

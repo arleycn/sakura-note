@@ -1,0 +1,16 @@
+---
+/**
+ * 背景层：渐变天空 + 星点 + 流云 + 落樱画布。
+ * 全部 position: fixed 且负 z-index，不占文档流、滚动不重绘。
+ * 加 transition:persist，ClientRouter 换页时不会重启动画。
+ */
+---
+
+<div class="backdrop" aria-hidden="true" transition:persist="backdrop">
+  <div class="backdrop__sky"></div>
+  <div class="backdrop__stars"></div>
+  <span class="backdrop__cloud" style="top: 10%; animation-duration: 74s">☁️</span>
+  <span class="backdrop__cloud" style="top: 28%; font-size: 44px; animation-duration: 96s; animation-delay: -32s">☁️</span>
+  <span class="backdrop__cloud" style="top: 62%; font-size: 52px; animation-duration: 118s; animation-delay: -70s">☁️</span>
+  <canvas class="backdrop__petals" id="petal-canvas"></canvas>
+</div>

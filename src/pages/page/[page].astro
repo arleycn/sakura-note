@@ -1,0 +1,41 @@
+---
+export const prerender = true;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import Pagination from '../../components/Pagination.astro';
+import { getPosts, paginate } from '../../lib/posts';
+import { PAGE_SIZE } from '../../config';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) => ({
+    params: { page: String(index + 2) },
+  }));
+}
+
+const pageNumber = Number(Astro.params.page ?? '2');
+const posts = await getPosts();
+const { items, current, totalPages } = paginate(posts, pageNumber);
+---
+
+<BaseLayout title={`第 ${current} 页`} description={`${'樱云小筑'}文章列表第 ${current} 页`}>
+  <div class="wrap page">
+    <section aria-labelledby="posts-title" style="padding-top: calc(var(--nav-h) + 40px)">
+      <div class="ch-head">
+        <span class="ch-badge" aria-hidden="true">📚</span>
+        <h2 class="ch-title" id="posts-title">第 {current} 页</h2>
+        <span class="ch-line"></span>
+        <a class="ch-more" href="/archives">全部归档 →</a>
+      </div>
+
+      <div class="posts">
+        {items.map((post) => <PostCard post={post} />)}
+      </div>
+
+      <Pagination current={current} totalPages={totalPages} />
+    </section>
+  </div>
+</BaseLayout>

@@ -1,0 +1,57 @@
+---
+import { NAV, SITE } from '../config';
+
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
+---
+
+<header class="topnav">
+  <a class="logo" href="/">
+    <span class="logo__sakura" aria-hidden="true">🌸</span>
+    <span>{SITE.name}</span>
+  </a>
+
+  <nav class="navlinks" aria-label="主导航">
+    {
+      NAV.map((item) => (
+        <a
+          href={item.href}
+          aria-current={isActive(item.href) ? 'page' : undefined}
+        >
+          <span aria-hidden="true">{item.emoji}</span> {item.label}
+        </a>
+      ))
+    }
+  </nav>
+
+  <div class="nav-actions">
+    <a class="icon-btn" href="/search" aria-label="搜索文章" title="搜索 (/)">
+      🔍
+    </a>
+    <button
+      class="icon-btn"
+      id="theme-toggle"
+      type="button"
+      aria-label="切换日夜主题"
+      title="切换日夜主题"
+    >
+      <span id="theme-icon" aria-hidden="true">🌙</span>
+    </button>
+
+    <details class="mobile-menu">
+      <summary aria-label="打开菜单">
+        <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
+      </summary>
+      <div class="mobile-menu__panel">
+        {
+          NAV.map((item) => (
+            <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+              <span aria-hidden="true">{item.emoji}</span> {item.label}
+            </a>
+          ))
+        }
+      </div>
+    </details>
+  </div>
+</header>

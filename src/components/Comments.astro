@@ -1,0 +1,86 @@
+---
+import { PUBLIC_TURNSTILE_SITE_KEY } from 'astro:env/client';
+
+interface Props {
+  postId: string;
+}
+
+const { postId } = Astro.props;
+const turnstileKey = PUBLIC_TURNSTILE_SITE_KEY ?? '';
+---
+
+<section class="comments" id="comments" aria-labelledby="comments-title">
+  <div class="ch-head">
+    <span class="ch-badge" aria-hidden="true">💌</span>
+    <h2 class="ch-title" id="comments-title">留言板</h2>
+    <span class="ch-line"></span>
+    <span class="ch-more" id="comment-count" aria-live="polite"></span>
+  </div>
+
+  <form class="comment-form" id="comment-form" data-post-id={postId} novalidate>
+    <input type="hidden" name="postId" value={postId} />
+
+    <!-- 蜜罐：正常用户不可见，被填写即判定为脚本 -->
+    <div class="hp" aria-hidden="true">
+      <label for="comment-website">网站</label>
+      <input id="comment-website" type="text" name="website" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label for="comment-author">昵称</label>
+      <input
+        id="comment-author"
+        type="text"
+        name="author"
+        maxlength="24"
+        required
+        autocomplete="nickname"
+        placeholder="怎么称呼你呀～"
+      />
+    </div>
+
+    <div class="field">
+      <label for="comment-body">留言内容</label>
+      <textarea
+        id="comment-body"
+        name="body"
+        maxlength="600"
+        required
+        placeholder="说点什么吧，纯文本，最多 600 字"
+      ></textarea>
+    </div>
+
+    <div class="field">
+      <label for="comment-image">配图（可选，≤2MB）</label>
+      <input id="comment-image" type="file" name="image" accept="image/png,image/jpeg,image/webp,image/gif" />
+    </div>
+
+    {
+      turnstileKey && (
+        <div class="field">
+          <div class="cf-turnstile" id="turnstile-slot" data-sitekey={turnstileKey}></div>
+        </div>
+      )
+    }
+
+    <div class="form-row">
+      <p class="form-status" id="comment-status" role="status" aria-live="polite"></p>
+      <button class="btn btn--primary" type="submit" id="comment-submit">
+        发送 ✉️
+      </button>
+    </div>
+  </form>
+
+  <noscript>
+    <p class="comments__empty">留言需要 JavaScript：提交走 Astro Actions 的 RPC 调用。</p>
+  </noscript>
+
+  <div class="comment-list" id="comment-list"></div>
+  <p class="comments__empty" id="comment-empty" hidden>还没有留言，来做第一个吧 (๑•̀ㅂ•́)و✧</p>
+</section>
+
+{
+  turnstileKey && (
+    <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer />
+  )
+}

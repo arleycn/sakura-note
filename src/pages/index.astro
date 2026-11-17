@@ -1,16 +1,71 @@
 ---
+export const prerender = true;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import Pagination from '../components/Pagination.astro';
+import { SITE } from '../config';
+import { getPosts, paginate, tagCounts } from '../lib/posts';
+
+const posts = await getPosts();
+const { items, current, totalPages } = paginate(posts, 1);
+const tags = tagCounts(posts).slice(0, 10);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  alternateName: SITE.nameEn,
+  url: SITE.url,
+  description: SITE.description,
+  inLanguage: SITE.locale,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `${SITE.url}/search?q={search_term_string}`,
+    'query-input': 'required name=search_term_string',
+  },
+};
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title={`${SITE.name} · ${SITE.tagline}`} fullTitle jsonLd={jsonLd}>
+  <div class="wrap page">
+    <section class="hero" aria-labelledby="hero-title">
+      <span class="hero__emoji" aria-hidden="true">🌸✨🌸</span>
+      <h1 id="hero-title">{SITE.name}</h1>
+      <p class="hero__sub">
+        {SITE.tagline} · <span class="nowrap">目前已写下 <b>{posts.length}</b> 篇笔记</span><br />
+        用 Astro 7 与 Cloudflare 全家桶搭起来的小站：内容构建期生成，交互走边缘。
+      </p>
+
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="#posts">开始阅读 📖</a>
+        <a class="btn btn--ghost" href="/rss.xml">订阅 RSS 📮</a>
+      </div>
+
+      <div class="tag-cloud" aria-label="热门标签">
+        {
+          tags.map(({ tag, count }) => (
+            <a class="tag-pill" href={`/tags/${encodeURIComponent(tag)}`}>
+              #{tag} <b>{count}</b>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="posts" aria-labelledby="posts-title">
+      <div class="ch-head">
+        <span class="ch-badge" aria-hidden="true">📚</span>
+        <h2 class="ch-title" id="posts-title">最新文章</h2>
+        <span class="ch-line"></span>
+        <a class="ch-more" href="/archives">全部归档 →</a>
+      </div>
+
+      <div class="posts">
+        {items.map((post) => <PostCard post={post} />)}
+      </div>
+
+      <Pagination current={current} totalPages={totalPages} />
+    </section>
+  </div>
+</BaseLayout>

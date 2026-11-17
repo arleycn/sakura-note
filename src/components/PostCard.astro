@@ -1,0 +1,38 @@
+---
+import type { Post } from '../lib/posts';
+import { formatDate, postPath, readingTime } from '../lib/posts';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, tags, emoji } = post.data;
+---
+
+<article class="post-card">
+  <span class="post-card__emoji" aria-hidden="true">{emoji}</span>
+
+  <h3 class="post-card__title">
+    <a href={postPath(post)}>{title}</a>
+  </h3>
+
+  <p class="post-card__desc">{description}</p>
+
+  <div class="post-card__meta">
+    <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+    <span aria-hidden="true">·</span>
+    <span>{readingTime(post.body)} 分钟</span>
+    {
+      tags.length > 0 && (
+        <span class="post-card__tags">
+          {tags.slice(0, 3).map((tag) => (
+            <a class="post-card__tag" href={`/tags/${encodeURIComponent(tag)}`}>
+              #{tag}
+            </a>
+          ))}
+        </span>
+      )
+    }
+  </div>
+</article>

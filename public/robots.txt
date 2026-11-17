@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /search
+Disallow: /_actions/
+Disallow: /media/
+
+Sitemap: https://sakura-blog.arley.cn/sitemap-index.xml

@@ -1,0 +1,33 @@
+---
+export const prerender = true;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getPosts, tagCounts } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return tagCounts(posts).map(({ tag }) => ({ params: { tag } }));
+}
+
+const tag = Astro.params.tag ?? '';
+const posts = await getPosts();
+const matched = posts.filter((post) => post.data.tags.includes(tag));
+---
+
+<BaseLayout title={`#${tag}`} description={`标签 #${tag} 下的全部文章`}>
+  <div class="wrap page" style="padding-top: calc(var(--nav-h) + 40px)">
+    <div class="ch-head" style="margin-top:0">
+      <span class="ch-badge" aria-hidden="true">🏷️</span>
+      <h1 class="ch-title">#{tag}</h1>
+      <span class="ch-line"></span>
+      <a class="ch-more" href="/tags">全部标签 →</a>
+    </div>
+
+    <div class="posts">
+      {matched.map((post) => <PostCard post={post} />)}
+    </div>
+
+    {matched.length === 0 && <p class="comments__empty">这个标签下还没有文章。</p>}
+  </div>
+</BaseLayout>

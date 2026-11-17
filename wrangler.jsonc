@@ -1,0 +1,58 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "sakura-blog",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-11-17",
+  "compatibility_flags": ["global_fetch_strictly_public"],
+
+  // Workers Static Assets：构建产物直接由边缘返回；
+  // 未匹配到资源时返回 404 页并带正确状态码（别用 SPA 回落，会被搜索引擎当重复页）。
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    // 站点 URL 不带尾斜杠，让边缘直接返回 /posts/x 的 index.html，不额外 301
+    "html_handling": "drop-trailing-slash",
+    // 关键：导航请求默认优先匹配静态资产，未命中就直接返回 404 页，
+    // 不会进 Worker。必须把按需渲染的路由显式放行，否则浏览器打开
+    // /search 会 404，而 curl（无 Sec-Fetch 头）却正常。
+    "run_worker_first": ["/search", "/search/", "/media/*", "/_actions/*"]
+  },
+
+  // 评论存储。
+  // database_id / KV id 需在 `wrangler d1 create` / `wrangler kv namespace create`
+  // 之后替换；本地开发用 .wrangler/state 的模拟存储，不依赖真实 id。
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sakura-blog-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // 浏览量计数（KV 读多写少，比 D1 更适合计数）
+  "kv_namespaces": [
+    {
+      "binding": "VIEWS",
+      "id": "00000000000000000000000000000000"
+    }
+  ],
+
+  // 评论配图对象存储
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "sakura-blog-media"
+    }
+  ],
+
+  // Cloudflare Images 绑定：运行期图片变换
+  "images": {
+    "binding": "IMAGES"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}
