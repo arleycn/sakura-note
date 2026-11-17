@@ -37,6 +37,7 @@
     "og": "node tools/make-og.mjs",
     "smoke": "node tools/smoke.mjs",
     "smoke:i18n": "node tools/i18n-smoke.mjs",
+    "screenshots": "node tools/screenshots.mjs",
     "astro": "astro"
   },
   "dependencies": {

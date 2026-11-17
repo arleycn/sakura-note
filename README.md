@@ -2,8 +2,7 @@
 
 A bilingual (Chinese / English) Astro 7 blog theme with a soft sakura look and a Cloudflare-native runtime.
 
-> Demo: `DEMO_URL`  
-> Get started: <https://github.com/arleycn/sakura-note>
+> Repository: <https://github.com/arleycn/sakura-note>
 
 ![Sakura Note desktop](screenshots/desktop.png)
 ![Sakura Note mobile](screenshots/mobile.png)
@@ -41,7 +40,7 @@ Requires Node.js `>=22.23.4`.
 | `public/images/avatar.svg` | Placeholder avatar |
 | `wrangler.jsonc` | Worker name, assets, D1 / KV / R2 / Images bindings |
 
-All placeholder URLs use `example.com` or the root of a public service, as required by the Astro theme catalogue.
+All placeholder URLs use `example.com` or the root of a public service so anyone can fork the theme without inheriting personal data.
 
 ## Commands
 
@@ -52,6 +51,7 @@ npm run preview     # local preview of the build
 npm run dev         # local development
 npm run og          # regenerate the default OG image
 npm run smoke       # browser smoke test against a running Cloudflare dev server
+npm run screenshots # capture README screenshots from a running server
 ```
 
 Local Cloudflare runtime check:
@@ -128,16 +128,11 @@ Measured in the same local harness before and after tuning:
 
 Reproduce with `node tools/perf-ab.mjs` against a running dev server.
 
-## Theme catalogue submission
-
-The demo must be an exact public deployment of this repository, not a personal site. Before submitting to <https://portal.astro.build>, update `DEMO_URL` in this README and in `docs/THEME_CATALOGUE.md`, then use the English description provided in that document. Keep listing text plain text and use the portal editor for formatting.
-
 ## Documentation
 
 - [Getting started](docs/GETTING_STARTED.md)
 - [Customization](docs/CUSTOMIZATION.md)
 - [Cloudflare deployment](docs/DEPLOY_CLOUDFLARE.md)
-- [Theme catalogue submission](docs/THEME_CATALOGUE.md)
 - [Contributing](CONTRIBUTING.md)
 
 ## 中文简介

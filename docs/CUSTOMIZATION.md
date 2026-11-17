@@ -14,7 +14,7 @@ Edit `src/config.ts`.
 - `MY_SITES`: sample site cards on the About page
 - `PAGE_SIZE`: posts per listing page
 
-The theme catalogue rejects real personal links and invented addresses that match the theme name. Use `example.com` and root URLs until you fork the theme for your own site.
+Keep the shipped sample generic: avoid real personal links and invented addresses that match the theme name. Use `example.com` and root URLs until you fork the theme for your own site.
 
 ## Deployment URL
 
@@ -83,7 +83,7 @@ Keep new animation on `transform` or `opacity`. Avoid animating `background-posi
 - Replace `public/images/avatar.svg` with your own image.
 - Regenerate `public/images/og-default.png` with `npm run og` after editing `tools/make-og.mjs`.
 
-For the public theme demo, keep these generic.
+Keep these generic in the public repository.
 
 ## Cloudflare bindings
 

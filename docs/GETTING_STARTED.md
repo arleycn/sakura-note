@@ -51,4 +51,3 @@ The first smoke test checks theme switching, client-side navigation, theme persi
 
 - Change site identity: [Customization](CUSTOMIZATION.md)
 - Deploy to Cloudflare: [Deploy](DEPLOY_CLOUDFLARE.md)
-- Submit to the Astro theme catalogue: [Theme catalogue](THEME_CATALOGUE.md)
