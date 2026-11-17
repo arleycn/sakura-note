@@ -20,6 +20,35 @@
 | 交互冒烟 | `node tools/smoke.mjs` **8/8 通过**（主题切换、ClientRouter 无刷新、导航后主题保持、阅读量、评论上屏、刷新持久化、移动端无横向溢出、控制台 0 报错） |
 | 布局实测 | 1440 / 1280 / 390 三种视口 `scrollWidth === clientWidth`，溢出元素 0 个 |
 | 内容 | 28 篇文章（2021-08 ~ 2026-11）、80 个标签、4 个年份；RSS 28 条，sitemap 116 条 |
+| 运行时性能 | 1440×900 桌面：**156.8fps**，p95 帧 **7.5ms**，掉帧（>33ms）**0**，主线程 120ms/160 帧；文章页 162fps、最长帧 14.4ms |
+| 常驻动画 | **3 个**：2 朵云（`transform`，96s/130s，可上合成层）+ 首页 150ms 淡入 |
+
+#### 性能调优记录（2026-11-17）
+
+首版有 10 个常驻 `infinite` 动画，其中 `sky-drift`（`background-position` 30s）作用在整屏渐变上、
+两处 `grad-flow` 作用在按钮与页脚渐变上——**动 `background-position` 无法上合成层，每帧整块重绘**；
+`twinkle` 则让整屏星点持续重绘。用 `tools/perf-ab.mjs` 做开关对照（同一路由、同一测量口径）：
+
+| 变体 | 主线程 taskMs | 样式重算 | p95 帧 | 最长帧 |
+|---|---|---|---|---|
+| 初始 10 个动画 | 362.8 | 57.2ms | 11.4ms | 69.9ms |
+| 只关 `backdrop-filter` | 355.1（**−2%，无关**） | 51.7ms | 11.5ms | 76.2ms |
+| 只关 canvas 花瓣 | 336.8（−7%） | 58.3ms | 9.0ms | 106.6ms |
+| 只关常驻动画 | **170.4（−53%）** | **8.0ms** | **7.5ms** | 76.6ms |
+| **调优后（现状）** | **120.4（−67%）** | **19.7ms** | **7.5ms** | **24.2ms** |
+
+结论与处置：
+
+- **删** `sky-drift` / `grad-flow` / `twinkle`（改静态渐变与静态星点，视觉无可见差别）；
+- **降** canvas 花瓣到 30fps（低端 24fps）、DPR 上限 1.5、数量 36→26；
+- **减** 云 3 朵→2 朵，logo 与 hero 的摆动改 hover 触发；
+- **快** 页面入场 550ms+位移 → **150ms 纯淡入**（位移会额外触发合成）；
+- **去重** `body` 的固定渐变背景（与 `.backdrop__sky` 重复栅格化），改兜底纯色；
+- `overflow-x: hidden` → `clip`，避免 body 变成滚动容器。
+- `backdrop-filter` 实测仅 −2%，**未动**（按数据留，不凭感觉删）。
+
+复测命令：`node tools/perf-ab.mjs`（A/B 对照表）、`node tools/perf.mjs <标签>`（单页）、
+`MSYS_NO_PATHCONV=1 PERF_ROUTE=/posts/xxx node tools/perf.mjs`（指定路由；Git Bash 会把以 `/` 开头的环境变量值转成 Windows 路径，必须加 `MSYS_NO_PATHCONV=1`）。
 
 ### 内容来源（2026-11-17 迁移）
 
@@ -71,7 +100,7 @@ sakura-blog/
 │   ├── pages/              # 首页、分页、文章、标签、归档、搜索、404、RSS、媒体代理
 │   ├── scripts/site.ts     # 全站客户端逻辑（挂在 astro:page-load）
 │   └── styles/global.css   # 设计令牌 + 全站样式 + 响应式
-└── tools/                  # 本地工具：OG 生成、布局测量、交互冒烟
+└── tools/                  # 本地工具：OG 生成、布局测量、交互冒烟、性能 A/B
 ```
 
 ---

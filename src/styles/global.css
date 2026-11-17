@@ -30,6 +30,7 @@
   --grad-main: linear-gradient(120deg, #ff6fa5, #a06ee8 55%, #6fc3ff);
   --grad-candy: linear-gradient(135deg, #ff8fb8, #ffc2dc);
   --grad-sky: linear-gradient(160deg, #ffd7e9 0%, #f0ddff 34%, #dcedff 68%, #cfe8ff 100%);
+  --bg-base: #ffd7e9;
 
   /* 阴影与缓动 */
   --shadow-1: 0 4px 16px rgba(240, 68, 127, 0.14);
@@ -69,6 +70,7 @@ html[data-theme='dark'] {
   --shadow-1: 0 4px 16px rgba(0, 0, 0, 0.35);
   --shadow-2: 0 16px 38px rgba(0, 0, 0, 0.5);
   --grad-sky: linear-gradient(160deg, #241b3a 0%, #3a2650 45%, #1c2b3e 100%);
+  --bg-base: #241b3a;
   color-scheme: dark;
 }
 
@@ -84,11 +86,12 @@ html[data-theme='dark'] {
     --border: rgba(255, 140, 190, 0.3);
     --border-strong: rgba(255, 140, 190, 0.5);
     --link: #ffa8cc;
-  --tag-ink: #ffd0e2;
+    --tag-ink: #ffd0e2;
     --pink-soft: rgba(255, 194, 220, 0.18);
     --shadow-1: 0 4px 16px rgba(0, 0, 0, 0.35);
     --shadow-2: 0 16px 38px rgba(0, 0, 0, 0.5);
     --grad-sky: linear-gradient(160deg, #241b3a 0%, #3a2650 45%, #1c2b3e 100%);
+    --bg-base: #241b3a;
     color-scheme: dark;
   }
 }
@@ -117,10 +120,9 @@ body {
   line-height: 1.75;
   color: var(--text);
   letter-spacing: 0.01em;
-  overflow-x: hidden;
-  background: var(--grad-sky);
-  background-attachment: fixed;
-  transition: background-color 0.4s ease, color 0.4s ease;
+  overflow-x: clip;
+  background: var(--bg-base);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* 内容不足一屏时页脚也贴底，避免页脚下面露出一段渐变 */
@@ -235,8 +237,6 @@ html[data-theme='dark'] ::-webkit-scrollbar-thumb {
   position: absolute;
   inset: 0;
   background: var(--grad-sky);
-  background-size: 200% 200%;
-  animation: sky-drift 30s ease-in-out infinite alternate;
 }
 
 .backdrop__stars {
@@ -253,7 +253,6 @@ html[data-theme='dark'] ::-webkit-scrollbar-thumb {
     radial-gradient(1.6px 1.6px at 92% 80%, #fff, var(--sky) 40%, transparent 60%),
     radial-gradient(1.6px 1.6px at 15% 86%, #fff, var(--purple) 40%, transparent 60%),
     radial-gradient(1.6px 1.6px at 64% 88%, #fff, var(--gold) 40%, transparent 60%);
-  animation: twinkle 3.6s ease-in-out infinite alternate;
 }
 
 html[data-theme='dark'] .backdrop__stars {
@@ -279,24 +278,6 @@ html[data-theme='dark'] .backdrop__cloud {
   height: 100%;
 }
 
-@keyframes sky-drift {
-  from {
-    background-position: 0% 0%;
-  }
-  to {
-    background-position: 100% 100%;
-  }
-}
-
-@keyframes twinkle {
-  from {
-    opacity: 0.3;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 @keyframes cloud-drift {
   from {
     transform: translateX(-12vw);
@@ -316,17 +297,15 @@ html[data-theme='dark'] .backdrop__cloud {
 }
 
 .page {
-  animation: page-in 0.55s var(--ease-out) both;
+  animation: page-in 0.15s ease-out both;
 }
 
 @keyframes page-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 
@@ -367,10 +346,14 @@ html[data-theme='dark'] .backdrop__cloud {
   text-decoration: none;
 }
 
+.logo:hover .logo__sakura {
+  transform: rotate(14deg) scale(1.08);
+}
+
 .logo__sakura {
   font-size: 19px;
   display: inline-block;
-  animation: saku-bob 2.6s ease-in-out infinite;
+  transition: transform 0.35s var(--ease-out);
   -webkit-text-fill-color: initial;
   color: initial;
   filter: none;
@@ -540,7 +523,6 @@ html[data-theme='dark'] .backdrop__cloud {
   display: inline-block;
   font-size: 22px;
   letter-spacing: 0.4em;
-  animation: saku-bob 4s ease-in-out infinite;
 }
 
 .hero h1 {
@@ -694,10 +676,9 @@ html[data-theme='dark'] .hero h1 {
 .btn--primary {
   color: #fff;
   background: var(--grad-main);
-  background-size: 200% 100%;
   border-color: transparent;
   box-shadow: 0 8px 18px rgba(240, 68, 127, 0.28);
-  animation: grad-flow 6s linear infinite;
+  transition: transform 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out);
 }
 
 .btn--primary:hover {
@@ -711,12 +692,6 @@ html[data-theme='dark'] .hero h1 {
 .btn[disabled] {
   opacity: 0.55;
   pointer-events: none;
-}
-
-@keyframes grad-flow {
-  to {
-    background-position: 200% 0;
-  }
 }
 
 /* ---------------- 文章卡片 ---------------- */
@@ -1590,8 +1565,6 @@ html[data-theme='dark'] .form-status[data-state='ok'] {
   text-align: center;
   color: #fff;
   background: var(--grad-main);
-  background-size: 250% 100%;
-  animation: grad-flow 10s linear infinite;
   position: relative;
   overflow: hidden;
 }

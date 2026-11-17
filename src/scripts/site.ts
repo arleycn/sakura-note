@@ -104,7 +104,7 @@ function initPetals() {
   });
 
   const resize = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     width = window.innerWidth;
     height = window.innerHeight;
     canvas.width = width * dpr;
@@ -115,14 +115,22 @@ function initPetals() {
   };
 
   const fillPool = () => {
-    let count = Math.min(Math.floor(width / (width < 760 ? 46 : 26)), 36);
+    let count = Math.min(Math.floor(width / (width < 760 ? 58 : 34)), 26);
     if (lowEnd) count = Math.ceil(count / 2);
     while (petals.length > count) petals.pop();
     while (petals.length < count) petals.push(spawn(true));
   };
 
-  const frame = () => {
+  // 花瓣是纯装饰，30fps 足够顺滑，比 60fps 省一半绘制开销
+  const FRAME_MS = lowEnd ? 1000 / 24 : 1000 / 30;
+  let lastDraw = 0;
+
+  const frame = (now = 0) => {
     if (!running) return;
+    frameId = requestAnimationFrame(frame);
+    if (now - lastDraw < FRAME_MS) return;
+    lastDraw = now;
+
     ctx.clearRect(0, 0, width, height);
 
     for (const petal of petals) {
@@ -147,8 +155,6 @@ function initPetals() {
       ctx.fill();
       ctx.restore();
     }
-
-    frameId = requestAnimationFrame(frame);
   };
 
   resize();
