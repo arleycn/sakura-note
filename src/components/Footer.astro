@@ -2,15 +2,27 @@
 import { SITE, SOCIAL } from '../config';
 
 const year = new Date().getFullYear();
+const yearRange = year === SITE.since ? `${year}` : `${SITE.since}-${year}`;
 ---
 
 <footer class="site-footer">
-  <div class="site-footer__big">🌸 {SITE.name} · {SITE.nameEn} 🌸</div>
+  <div class="site-footer__big">🌸 {SITE.name} · {SITE.theme} 🌸</div>
+  <p class="site-footer__row">{SITE.tagline}</p>
   <p class="site-footer__row">
-    {SITE.tagline} · © {year} {SITE.author}
+    © {yearRange}
+    <a href="https://arley.cn" rel="noopener">{SITE.author}</a>
+    · 基于
+    <a href="https://astro.build/" rel="noopener">Astro</a>
+    构建 · 托管于
+    <a href="https://www.cloudflare.com/" rel="noopener">Cloudflare</a>
   </p>
   <p class="site-footer__row">
-    Astro 7 × Cloudflare Workers · 内容构建期生成，交互走边缘
+    <a
+      class="site-footer__beian"
+      href="https://icp.gov.moe/?keyword=20223666"
+      rel="nofollow noopener noreferrer"
+      target="_blank">萌ICP备20223666号</a
+    >
   </p>
   <nav class="site-footer__links" aria-label="站外链接">
     {SOCIAL.map((item) => (

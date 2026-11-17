@@ -15,7 +15,7 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: SITE.name,
-  alternateName: SITE.nameEn,
+  alternateName: SITE.theme,
   url: SITE.url,
   description: SITE.description,
   inLanguage: SITE.locale,
@@ -33,8 +33,9 @@ const jsonLd = {
       <span class="hero__emoji" aria-hidden="true">🌸✨🌸</span>
       <h1 id="hero-title">{SITE.name}</h1>
       <p class="hero__sub">
-        {SITE.tagline} · <span class="nowrap">目前已写下 <b>{posts.length}</b> 篇笔记</span><br />
-        用 Astro 7 与 Cloudflare 全家桶搭起来的小站：内容构建期生成，交互走边缘。
+        折腾记录、技术教程，还有一点二次元。<br />
+        <span class="nowrap">已写下 <b>{posts.length}</b> 篇笔记</span> ·
+        <span class="hero__en">Where there is life, there is hope.</span>
       </p>
 
       <div class="hero__actions">

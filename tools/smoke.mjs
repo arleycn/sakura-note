@@ -8,6 +8,8 @@ import puppeteer from 'puppeteer-core';
 
 const EDGE = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
 const BASE = process.argv[2] ?? 'http://127.0.0.1:8787';
+// 用首页第一页上的一篇真实文章做导航与评论目标
+const TARGET = '/posts/xiongan-five-years';
 
 const results = [];
 const errors = [];
@@ -46,20 +48,21 @@ check('主题切换', after.theme !== before && after.saved === after.theme, JSO
 await page.evaluate(() => {
   window.__marker = 'kept';
 });
-const target = await page.$('a[href="/posts/official-ajax-actions"]');
+const target = await page.$(`a[href="${TARGET}"]`);
 if (!target) {
   check('找到文章链接', false);
 } else {
-  await page.evaluate(() => {
+  await page.evaluate((path) => {
     document
-      .querySelector('a[href="/posts/official-ajax-actions"]')
+      .querySelector(`a[href="${path}"]`)
       ?.scrollIntoView({ behavior: 'instant', block: 'center' });
-  });
+  }, TARGET);
   await new Promise((resolve) => setTimeout(resolve, 120));
   await target.click();
   await page.waitForFunction(
-    () => location.pathname === '/posts/official-ajax-actions',
+    (path) => location.pathname === path,
     { timeout: 15000 },
+    TARGET,
   );
   const kept = await page.evaluate(() => window.__marker === 'kept');
   const themeKept = await page.evaluate(() => document.documentElement.dataset.theme);

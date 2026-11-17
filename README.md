@@ -1,6 +1,6 @@
-# 樱云小筑 · Sakura Note
+# Arley's Blog · 樱云小筑
 
-樱花主题的个人博客。**Astro 7 + Cloudflare 全家桶**，视觉语言取自 [`bm.arley.cn`](https://bm.arley.cn)（本地源码 `D:\GitHub\sakura-nav`）。
+樱花主题的个人博客（主题名「樱云小筑」）。**Astro 7 + Cloudflare 全家桶**，视觉语言取自 [`bm.arley.cn`](https://bm.arley.cn)（本地源码 `D:\GitHub\sakura-nav`）。
 
 > 一句话架构：**内容是构建期产物，交互是运行时能力。** 文章、列表、标签、归档在构建时出 HTML，由 Workers Static Assets 从边缘直接返回；评论、阅读量、配图走 Worker + D1 / KV / R2。
 
@@ -15,10 +15,25 @@
 | Wrangler | `4.163.0` |
 | Node | `24.22.1`（packages 要求 ≥ 22.23.4） |
 | `astro check` | **0 error / 0 warning / 0 hint**（32 文件） |
-| `astro build` | 成功，**23 个预渲染路由** + 4 个按需路由 |
-| 产物体积 | client **399 KB**，server 2.7 MB；CSS 24.4 KB，站点 JS 14.4 KB，首页 HTML 12.2 KB，文章页 14.8 KB |
+| `astro build` | 成功，**114 个预渲染页面**（28 篇文章 + 80 个标签页 + 5 页分页 + 归档/关于/标签/搜索/404）+ 4 个按需路由 |
+| 产物体积 | client **8.0 MB**（其中 `pic/` 文章配图 6.3 MB / 95 张），server 3.1 MB；CSS 26.0 KB，站点 JS 14.4 KB，首页 HTML 14.7 KB，文章页 25.6 KB |
 | 交互冒烟 | `node tools/smoke.mjs` **8/8 通过**（主题切换、ClientRouter 无刷新、导航后主题保持、阅读量、评论上屏、刷新持久化、移动端无横向溢出、控制台 0 报错） |
 | 布局实测 | 1440 / 1280 / 390 三种视口 `scrollWidth === clientWidth`，溢出元素 0 个 |
+| 内容 | 28 篇文章（2021-08 ~ 2026-11）、80 个标签、4 个年份；RSS 28 条，sitemap 116 条 |
+
+### 内容来源（2026-11-17 迁移）
+
+文章、站点文案、关于页信息都对齐线上站 `blog.arley.cn`（本地 `D://GitHub//arley-blog`）：
+
+| 迁移项 | 怎么处理 |
+|---|---|
+| 文章正文 / front-matter | 原样搬入 `src/content/posts/`，仅补 `emoji`（卡片装饰）字段 |
+| 旧内链 `/2026/10/27/xxx/` | 按 `legacy-paths.json` 映射改写成 `/posts/<id>`，共 11 处 |
+| `/about/` 链接 | 改成 `/about`（本站 URL 不带尾斜杠） |
+| 文章配图 | `public/pic/` 95 张原图复制，路径不变 |
+| 站名 / 描述 / 标语 | 取自线上站 `SITE` 与 `PROFILE`，集中在 `src/config.ts` |
+| 关于页 | 头像、自我介绍、8 个自建站入口、GitHub/Telegram/邮箱 |
+| 页脚 | 版权区间 2021-2026、萌ICP备20223666号、社交入口 |
 
 ---
 
@@ -45,11 +60,11 @@ sakura-blog/
 ├── astro.config.mjs        # 站点、适配器、预取、Shiki 双主题、astro:env
 ├── wrangler.jsonc          # Workers + Static Assets + D1/KV/R2/Images
 ├── migrations/             # D1 迁移（评论表 + 查询索引）
-├── public/                 # favicon / OG 图 / _headers / robots.txt
+├── public/                 # favicon / OG 图 / 文章配图 pic/ / _headers / robots.txt
 ├── src/
 │   ├── actions/index.ts    # 官方 Actions：comments.list/add、views.get/hit
 │   ├── components/         # Header / Footer / 背景层 / 卡片 / 分页 / 评论
-│   ├── content/posts/      # 5 篇示例文章（Markdown）
+│   ├── content/posts/      # 28 篇文章（Markdown，含 categories/emoji）
 │   ├── content.config.ts   # 内容集合 + Zod schema
 │   ├── layouts/            # BaseLayout（SEO / ClientRouter / 防闪烁脚本）
 │   ├── lib/                # posts 查询、D1/KV 访问、Turnstile 与限流
@@ -156,4 +171,6 @@ npm run deploy
 - **阅读量 KV 无原子自增**：同一秒并发会丢更新，计数场景可接受；要精确就换 D1 或 Durable Object。
 - **`wrangler types` 生成的全局 `Element` 会与 DOM `Element` 合并**，`append/prepend` 签名被 HTMLRewriter 版本覆盖。客户端代码统一用 `appendChild` / `insertBefore`，不要用 `append/prepend`。
 - **站点域名是占位值** `https://sakura-blog.arley.cn`，改域名只需改 `src/config.ts` 与 `astro.config.mjs` 的 `SITE`，以及 `public/robots.txt` 的 sitemap 行。
-- **示例文章 5 篇**，`PAGE_SIZE = 4` 用于演示分页；文章少于 5 篇时 `/page/2` 不再生成。
+- **`PAGE_SIZE = 6`**（三列网格两行）；28 篇文章分成 5 页，`/page/2` ~ `/page/5` 按需生成。
+- **文章配图是静态文件**（`public/pic/*.webp`，与线上站同一批图）。正文里是原生 `<img>` 标签，不走 `astro:assets` 的构建期压缩；要享受官方图片优化，需要把图挪到 `src/assets` 并改成相对路径引用。
+- **标签存在大小写重复**：`Teambition`/`teambition`、`Panindex`/`panindex`、`OneManager`/`onemanage`、`infinity free` 等，来源是历史文章手写不一致。合并需要改文章 front-matter，未擅自改动。

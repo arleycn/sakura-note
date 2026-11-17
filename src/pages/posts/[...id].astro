@@ -69,6 +69,11 @@ const jsonLd = {
               )
             }
             <span>{readingTime(post.body)} 分钟读完</span>
+            {
+              post.data.categories.map((category) => (
+                <span class="post__cat">📁 {category}</span>
+              ))
+            }
             <span class="post__views" data-views-post={post.id}>
               👀 <span data-views-count>—</span> 次阅读
             </span>
